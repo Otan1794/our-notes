@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Warm paper palette — a private corkboard, not a corporate dashboard */
+  --paper: 40 33% 96%;        /* #F8F5EF linen background */
+  --ink: 210 12% 15%;         /* #24272A near-black text, warm undertone */
+  --card: 40 25% 99%;         /* #FDFCFA card surface, slightly lifted off paper */
+  --border: 35 18% 87%;       /* soft warm hairline */
+  --muted: 35 10% 45%;        /* secondary text */
+
+  --teal: 187 34% 26%;        /* #2C5C5F deep teal — primary accent, category headers */
+  --teal-foreground: 40 33% 97%;
+  --coral: 10 62% 60%;        /* #E2725B warm coral — used sparingly: favorites, pin marker */
+  --coral-foreground: 40 33% 97%;
+  --pin: 10 62% 60%;
+
+  --font-display: 'Fraunces', ui-serif, serif;
+  --font-sans: 'Inter', ui-sans-serif, sans-serif;
+}
+
+.dark {
+  --paper: 210 15% 10%;
+  --ink: 40 20% 92%;
+  --card: 210 14% 14%;
+  --border: 210 10% 22%;
+  --muted: 210 8% 60%;
+  --teal: 187 40% 55%;
+  --teal-foreground: 210 15% 10%;
+  --coral: 10 70% 65%;
+  --coral-foreground: 210 15% 10%;
+  --pin: 10 70% 65%;
+}
+
+body {
+  background-color: hsl(var(--paper));
+  color: hsl(var(--ink));
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+
+/* react-grid-layout requires these base classes */
+.react-grid-item.react-grid-placeholder {
+  background: hsl(var(--teal) / 0.15);
+  border-radius: 14px;
+}
