@@ -1,4 +1,4 @@
-import { FileText, Link2, Image as ImageIcon, Video, CheckSquare, File } from 'lucide-react';
+import { FileText, Link2, Image as ImageIcon, Video, CheckSquare, File, MapPin } from 'lucide-react';
 import type { ItemType } from '@/types/item';
 
 /**
@@ -14,7 +14,8 @@ export const ITEM_TYPE_REGISTRY: Record<ItemType, { label: string; icon: typeof 
   image: { label: 'Image', icon: ImageIcon },
   video: { label: 'Video', icon: Video },
   todo: { label: 'Task', icon: CheckSquare },
-  document: { label: 'Document', icon: File }
+  document: { label: 'Document', icon: File },
+  location: { label: 'Location', icon: MapPin }
 };
 
 export function getItemTypeIcon(type: ItemType) {
