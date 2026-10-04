@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -10,6 +10,8 @@ import { CategoryCard } from './CategoryCard';
 import { saveLayout, type GridLayoutItem } from '@/services/layouts';
 import { AddCategoryDialog } from '@/components/categories/AddCategoryDialog';
 import { ItemCard } from '@/components/items/ItemCard';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useContainerWidth } from '@/hooks/useContainerWidth';
 
 export function DashboardGrid({
   workspaceId,
@@ -22,7 +24,10 @@ export function DashboardGrid({
   items: Item[];
   initialLayout: GridLayoutItem[];
 }) {
-  const [width, setWidth] = useState(1200);
+  // Phones/small tablets get a simple stacked list (touch-friendly, no
+  // drag-and-drop). md and up (>= 768px) gets the draggable grid.
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const [gridRef, width] = useContainerWidth<HTMLDivElement>();
 
   const layout: Layout[] = useMemo(() => {
     if (initialLayout.length) return initialLayout;
@@ -45,6 +50,18 @@ export function DashboardGrid({
     }
     return map;
   }, [items]);
+
+  // Stacked order on mobile follows the saved desktop layout (top to bottom,
+  // then left to right) so both views read in the same order.
+  const orderedCategories = useMemo(() => {
+    const pos = new Map(layout.map((l) => [l.i, l]));
+    return [...categories].sort((a, b) => {
+      const pa = pos.get(a.id);
+      const pb = pos.get(b.id);
+      if (!pa || !pb) return 0;
+      return pa.y - pb.y || pa.x - pb.x;
+    });
+  }, [categories, layout]);
 
   const uncategorizedItems = itemsByCategory.get('uncategorized') ?? [];
 
@@ -83,27 +100,36 @@ export function DashboardGrid({
           </div>
         </div>
       ) : (
-        <div
-          ref={(node) => {
-            if (node) setWidth(node.offsetWidth);
-          }}
-        >
-          <GridLayout
-            className="layout"
-            layout={layout}
-            cols={12}
-            rowHeight={40}
-            width={width}
-            onDragStop={handleLayoutChange}
-            onResizeStop={handleLayoutChange}
-            draggableHandle=".category-drag-handle"
-          >
-            {categories.map((category) => (
-              <div key={category.id}>
-                <CategoryCard category={category} items={itemsByCategory.get(category.id) ?? []} />
-              </div>
-            ))}
-          </GridLayout>
+        <div ref={gridRef}>
+          {isDesktop === null ? null : isDesktop ? (
+            <GridLayout
+              className="layout"
+              layout={layout}
+              cols={12}
+              rowHeight={40}
+              width={width}
+              onDragStop={handleLayoutChange}
+              onResizeStop={handleLayoutChange}
+              draggableHandle=".category-drag-handle"
+            >
+              {categories.map((category) => (
+                <div key={category.id}>
+                  <CategoryCard category={category} items={itemsByCategory.get(category.id) ?? []} />
+                </div>
+              ))}
+            </GridLayout>
+          ) : (
+            <div className="space-y-3">
+              {orderedCategories.map((category) => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  items={itemsByCategory.get(category.id) ?? []}
+                  stacked
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

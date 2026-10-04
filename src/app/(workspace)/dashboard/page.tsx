@@ -6,6 +6,7 @@ import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { AddItemDialog } from '@/components/items/AddItemDialog';
 import { AddCategoryDialog } from '@/components/categories/AddCategoryDialog';
 import { SearchBar } from '@/components/search/SearchBar';
+import { SignOutButton } from '@/components/auth/SignOutButton';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -31,13 +32,14 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-paper p-4 md:p-8">
+    <main className="min-h-dvh bg-paper p-4 md:p-8">
       <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h1 className="font-display text-2xl font-semibold text-ink">Our Space</h1>
-        <div className="flex flex-1 items-center gap-3 md:justify-end">
+        <div className="flex flex-1 flex-wrap items-center gap-2 md:justify-end md:gap-3">
           <SearchBar workspaceId={workspaceId} />
           {categories.length > 0 && <AddCategoryDialog workspaceId={workspaceId} />}
           <AddItemDialog workspaceId={workspaceId} categories={categories} />
+          <SignOutButton />
         </div>
       </header>
 

@@ -62,7 +62,7 @@ export function ItemCard({ item }: { item: Item }) {
   }
 
   return (
-    <div className="group rounded-card border border-border bg-card p-4 shadow-pin transition hover:-translate-y-0.5">
+    <div className="group min-w-0 rounded-card border border-border bg-card p-4 shadow-pin transition hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 text-muted">
           <Icon size={16} />
@@ -71,13 +71,14 @@ export function ItemCard({ item }: { item: Item }) {
         <div className="flex items-center gap-1">
           <button
             onClick={handleToggleFavorite}
+            className="-m-1 p-2"
             aria-label={item.isFavorite ? 'Remove from favorites' : 'Mark as favorite'}
           >
             <Star size={16} className={item.isFavorite ? 'fill-coral text-coral' : 'text-muted'} />
           </button>
 
           <DropdownMenu>
-            <DropdownMenuTrigger aria-label="More options">
+            <DropdownMenuTrigger aria-label="More options" className="-m-1 p-2">
               <MoreVertical size={16} className="text-muted" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -159,8 +160,8 @@ export function ItemCard({ item }: { item: Item }) {
         </div>
       )}
 
-      <h3 className="mt-3 font-display text-base font-semibold text-ink">{item.title}</h3>
-      {bodyText && <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{bodyText}</p>}
+      <h3 className="mt-3 break-words font-display text-base font-semibold text-ink">{item.title}</h3>
+      {bodyText && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted">{bodyText}</p>}
 
       {item.type === 'todo' && (item.metadata as TodoMetadata)?.dueDate && (
         <DueDateBadge dueDate={(item.metadata as TodoMetadata).dueDate!} />

@@ -31,7 +31,7 @@ export function AddCategoryDialog({ workspaceId }: { workspaceId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm font-medium text-ink hover:border-teal hover:text-teal">
+        <button className="flex min-h-[40px] flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2 text-sm md:flex-none font-medium text-ink hover:border-teal hover:text-teal">
           <FolderPlus size={16} /> New Category
         </button>
       </DialogTrigger>

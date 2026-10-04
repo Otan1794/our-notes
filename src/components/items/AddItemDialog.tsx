@@ -158,7 +158,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1 rounded-lg bg-teal px-4 py-2 text-sm font-medium text-teal-foreground hover:opacity-90">
+        <button className="flex min-h-[40px] flex-1 items-center justify-center gap-1 rounded-lg bg-teal px-4 py-2 text-sm md:flex-none font-medium text-teal-foreground hover:opacity-90">
           <Plus size={16} /> Add Item
         </button>
       </DialogTrigger>
