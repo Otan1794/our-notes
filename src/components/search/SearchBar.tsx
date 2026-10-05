@@ -20,7 +20,7 @@ export function SearchBar({ workspaceId }: { workspaceId: string }) {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search…"
-        className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-teal"
+        className="w-full glass-input py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-teal"
       />
     </form>
   );

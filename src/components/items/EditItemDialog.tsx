@@ -73,7 +73,7 @@ export function EditItemDialog({
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+            className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
           />
 
           {isTodo ? (
@@ -84,7 +84,7 @@ export function EditItemDialog({
                   type="datetime-local"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+                  className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
                 />
               </div>
               <ChecklistEditor items={checklist} onChange={setChecklist} />
@@ -98,14 +98,14 @@ export function EditItemDialog({
               placeholder={item.type === 'link' ? 'URL' : item.type === 'video' ? 'YouTube, Instagram Reel, or Facebook Reel URL' : 'Details'}
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="h-24 w-full resize-none rounded-lg border border-border bg-paper p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
+              className="h-24 w-full resize-none glass-input p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
             />
           )}
 
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm"
+            className="w-full glass-input px-3 py-2 text-sm"
           >
             <option value="">No category</option>
             {categories.map((c) => (
@@ -117,7 +117,7 @@ export function EditItemDialog({
           <button
             onClick={handleSave}
             disabled={saving || !title.trim()}
-            className="w-full rounded-lg bg-teal px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
+            className="w-full glass-btn-primary px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
           >
             Save changes
           </button>

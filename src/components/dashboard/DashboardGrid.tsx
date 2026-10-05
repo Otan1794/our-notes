@@ -90,7 +90,7 @@ export function DashboardGrid({
       )}
 
       {categories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-border bg-card/40 py-16 text-center">
+        <div className="flex flex-col items-center justify-center glass-inner rounded-[22px] py-16 text-center">
           <p className="text-sm text-muted">
             No categories yet. Create one to start organizing your dashboard —
             or just keep adding items and sort them later.

@@ -39,6 +39,24 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Ambient colour field. Glass needs something colourful behind it to
+   blur and refract; this sits fixed behind all content (a fixed pseudo
+   element instead of background-attachment: fixed, which iOS ignores). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(52rem 38rem at 8% -8%, hsl(var(--teal) / 0.42), transparent 62%),
+    radial-gradient(46rem 34rem at 104% 6%, hsl(var(--coral) / 0.38), transparent 60%),
+    radial-gradient(44rem 38rem at 24% 112%, hsl(45 85% 55% / 0.36), transparent 60%),
+    radial-gradient(36rem 30rem at 96% 96%, hsl(210 60% 60% / 0.34), transparent 60%),
+    radial-gradient(30rem 26rem at 58% 46%, hsl(187 50% 55% / 0.2), transparent 65%),
+    hsl(var(--paper));
+}
+
 h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
@@ -61,4 +79,134 @@ h1, h2, h3, .font-display {
 
 html {
   -webkit-text-size-adjust: 100%;
+}
+
+/* ---------------------------------------------------------------------
+   Liquid glass
+   Inspired by dashersw/liquid-glass-js (frosted blur, bright rim light,
+   gradient tint, soft lift shadow), built with native backdrop-filter so
+   it stays live, GPU-accelerated and works on iOS Safari.
+
+   .glass        panels that sit on the page (category cards, header)
+   .glass-strong overlays that need more legibility (dialogs, menus)
+   .glass-inner  cheap glass for items nested inside a panel: no blur,
+                 because stacking backdrop-filters is slow on phones
+   .glass-input / .glass-btn / .glass-btn-primary   controls
+   --------------------------------------------------------------------- */
+@layer components {
+  .glass {
+    position: relative;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(255, 255, 255, 0.16) 46%,
+      rgba(255, 255, 255, 0.36) 100%
+    );
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 1px 0 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px rgba(31, 41, 55, 0.06),
+      0 14px 36px -10px rgba(31, 41, 55, 0.2);
+  }
+
+  .glass-strong {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(255, 255, 255, 0.58) 55%,
+      rgba(255, 255, 255, 0.72) 100%
+    );
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    backdrop-filter: blur(30px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 1px 0 0 rgba(255, 255, 255, 0.5),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+      0 24px 60px -12px rgba(31, 41, 55, 0.35);
+  }
+
+  .glass-inner {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52));
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 1px 2px rgba(31, 41, 55, 0.06),
+      0 8px 20px -8px rgba(31, 41, 55, 0.18);
+  }
+
+  .glass-input {
+    border-radius: 0.75rem;
+    color: hsl(var(--ink));
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 2px rgba(31, 41, 55, 0.1),
+      0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .glass-input::placeholder {
+    color: hsl(var(--muted));
+  }
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .glass-btn {
+    border-radius: 0.75rem;
+    color: hsl(var(--ink));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.34));
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 1px 2px rgba(31, 41, 55, 0.08),
+      0 6px 14px -6px rgba(31, 41, 55, 0.2);
+    transition: transform 0.15s, background 0.2s, box-shadow 0.2s, color 0.2s;
+  }
+  .glass-btn:hover {
+    color: hsl(var(--teal));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
+  }
+  .glass-btn:active {
+    transform: scale(0.97);
+  }
+
+  .glass-btn-primary {
+    border-radius: 0.75rem;
+    color: hsl(var(--teal-foreground));
+    background: linear-gradient(180deg, hsl(var(--teal) / 0.88), hsl(var(--teal)));
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+      0 8px 18px -6px hsl(var(--teal) / 0.55);
+    transition: transform 0.15s, filter 0.2s;
+  }
+  .glass-btn-primary:hover {
+    filter: brightness(1.12);
+  }
+  .glass-btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  /* Fallbacks: no backdrop-filter support, or the user asked the OS for
+     less transparency. Swap the translucent panels for solid surfaces. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass,
+    .glass-strong {
+      background: hsl(var(--card));
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass,
+    .glass-strong {
+      background: hsl(var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
 }

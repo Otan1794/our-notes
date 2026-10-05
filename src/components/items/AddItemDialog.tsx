@@ -158,7 +158,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex min-h-[40px] flex-1 items-center justify-center gap-1 rounded-lg bg-teal px-4 py-2 text-sm md:flex-none font-medium text-teal-foreground hover:opacity-90">
+        <button className="flex min-h-[40px] whitespace-nowrap flex-1 items-center justify-center gap-1 glass-btn-primary px-4 py-2 text-sm md:flex-none font-medium text-teal-foreground hover:opacity-90">
           <Plus size={16} /> Add Item
         </button>
       </DialogTrigger>
@@ -173,12 +173,12 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                 placeholder="Paste a link, or jot a quick note…"
                 value={quickText}
                 onChange={(e) => setQuickText(e.target.value)}
-                className="h-20 w-full resize-none rounded-lg border border-border bg-paper p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
+                className="h-20 w-full resize-none glass-input p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
               />
               <button
                 onClick={quickSave}
                 disabled={saving || !quickText.trim()}
-                className="mt-2 w-full rounded-lg bg-teal px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
+                className="mt-2 w-full glass-btn-primary px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
               >
                 Save
               </button>
@@ -195,7 +195,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                   <button
                     key={type}
                     onClick={() => setSelectedType(type)}
-                    className="flex flex-col items-center gap-1 rounded-lg border border-border p-3 text-xs hover:border-teal hover:text-teal"
+                    className="flex flex-col items-center gap-1 glass-btn p-3 text-xs"
                   >
                     <Icon size={18} />
                     {label}
@@ -213,7 +213,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                   placeholder="Paste a Google Maps link…"
                   value={mapsLinkInput}
                   onChange={(e) => setMapsLinkInput(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+                  className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
                 />
                 {resolvingLink && <p className="text-xs text-muted">Looking up the link…</p>}
                 {resolveError && (
@@ -223,11 +223,11 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                   </p>
                 )}
                 {resolvedLocation && (
-                  <div className="space-y-2 rounded-lg border border-border p-2">
+                  <div className="glass-inner space-y-2 rounded-xl p-2">
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+                      className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
                     />
                     {resolvedLocation.lat != null && resolvedLocation.lng != null && (
                       <div className="h-32 w-full overflow-hidden rounded-lg">
@@ -246,7 +246,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                 placeholder="Title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+                className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
               />
             )}
 
@@ -258,7 +258,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                     type="datetime-local"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+                    className="w-full glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
                   />
                 </div>
                 <ChecklistEditor items={checklist} onChange={setChecklist} />
@@ -274,14 +274,14 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
                 }
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className="h-24 w-full resize-none rounded-lg border border-border bg-paper p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
+                className="h-24 w-full resize-none glass-input p-3 text-sm outline-none focus:ring-2 focus:ring-teal"
               />
             )}
 
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-sm"
+              className="w-full glass-input px-3 py-2 text-sm"
             >
               <option value="">No category</option>
               {categories.map((c) => (
@@ -291,13 +291,13 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
               ))}
             </select>
             <div className="flex gap-2">
-              <button onClick={() => setSelectedType(null)} className="flex-1 rounded-lg border border-border px-3 py-2 text-sm">
+              <button onClick={() => setSelectedType(null)} className="glass-btn flex-1 px-3 py-2 text-sm">
                 Back
               </button>
               <button
                 onClick={fullSave}
                 disabled={saving || !title.trim() || (selectedType === 'location' && !resolvedLocation)}
-                className="flex-1 rounded-lg bg-teal px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
+                className="flex-1 glass-btn-primary px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
               >
                 Save
               </button>

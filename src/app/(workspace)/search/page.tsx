@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { searchItems } from '@/services/search';
@@ -10,19 +11,22 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     data: { user }
   } = await supabase.auth.getUser();
 
+  if (!user) redirect('/login');
+
   const { data: membership } = await supabase
     .from('workspace_members')
     .select('workspace_id')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .limit(1)
-    .single();
+    .maybeSingle();
+  if (!membership) redirect('/dashboard');
 
   const { q } = await searchParams;
   const query = q ?? '';
-  const results = query ? await searchItems(membership!.workspace_id, query) : [];
+  const results = query ? await searchItems(membership.workspace_id, query) : [];
 
   return (
-    <main className="min-h-dvh bg-paper p-4 md:p-8">
+    <main className="min-h-dvh p-4 md:p-8">
       <Link href="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-teal">
         <ArrowLeft size={14} /> Back to dashboard
       </Link>

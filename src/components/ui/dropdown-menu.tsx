@@ -13,7 +13,7 @@ export function DropdownMenuContent({ className, children }: { className?: strin
         align="end"
         sideOffset={4}
         className={cn(
-          'z-50 min-w-[10rem] rounded-lg border border-border bg-card p-1 shadow-pin',
+          'z-50 min-w-[10rem] glass-strong rounded-xl p-1',
           className
         )}
       >
@@ -32,7 +32,7 @@ export function DropdownMenuItem({
     <RadixDropdown.Item
       className={cn(
         'cursor-pointer rounded-md px-2 py-1.5 text-sm outline-none transition',
-        destructive ? 'text-coral hover:bg-coral/10' : 'text-ink hover:bg-teal/10',
+        destructive ? 'text-coral hover:bg-coral/10' : 'text-ink hover:bg-white/60',
         className
       )}
       {...props}

@@ -29,7 +29,7 @@ export function ChecklistEditor({
       {items.length > 0 && (
         <ul className="space-y-1">
           {items.map((line) => (
-            <li key={line.id} className="flex items-center gap-2 rounded-lg border border-border bg-paper px-2 py-1.5">
+            <li key={line.id} className="flex items-center gap-2 glass-input px-2 py-1.5">
               <span className="flex-1 text-sm text-ink">{line.text}</span>
               <button onClick={() => removeLine(line.id)} aria-label="Remove line item">
                 <X size={14} className="text-muted hover:text-coral" />
@@ -50,12 +50,12 @@ export function ChecklistEditor({
             }
           }}
           placeholder="Add a line item…"
-          className="flex-1 rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+          className="flex-1 glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
         />
         <button
           onClick={addLine}
           type="button"
-          className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm hover:border-teal hover:text-teal"
+          className="flex items-center gap-1 glass-btn px-3 py-2 text-sm"
         >
           <Plus size={14} /> Add
         </button>

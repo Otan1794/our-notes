@@ -62,7 +62,7 @@ export function ItemCard({ item }: { item: Item }) {
   }
 
   return (
-    <div className="group min-w-0 rounded-card border border-border bg-card p-4 shadow-pin transition hover:-translate-y-0.5">
+    <div className="group min-w-0 glass-inner rounded-2xl p-4 transition hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 text-muted">
           <Icon size={16} />

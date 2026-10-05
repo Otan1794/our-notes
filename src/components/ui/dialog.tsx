@@ -10,12 +10,12 @@ export const DialogTrigger = RadixDialog.Trigger;
 export function DialogContent({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <RadixDialog.Portal>
-      <RadixDialog.Overlay className="fixed inset-0 z-50 bg-ink/30 backdrop-blur-sm" />
+      <RadixDialog.Overlay className="fixed inset-0 z-50 bg-ink/20 backdrop-blur-[6px]" />
       <RadixDialog.Content
         className={cn(
           // w-[calc(100%-2rem)] keeps a 16px gutter on phones; max-h + overflow-y-auto
           // lets tall forms scroll instead of running off-screen (dvh = iOS-safe viewport height).
-          'fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-card border border-border bg-card p-4 shadow-pin sm:p-6',
+          'fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto glass-strong rounded-[22px] p-4 sm:p-6',
           className
         )}
       >

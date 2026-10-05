@@ -38,7 +38,7 @@ export function CategoryCard({
 
   return (
     <div
-      className={`flex flex-col rounded-card border border-border bg-card/60 p-3 shadow-pin ${stacked ? '' : 'h-full'}`}
+      className={`flex flex-col glass rounded-[22px] p-3 ${stacked ? '' : 'h-full'}`}
     >
       {stacked ? (
         <button

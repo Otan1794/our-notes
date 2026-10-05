@@ -31,7 +31,7 @@ export function AddCategoryDialog({ workspaceId }: { workspaceId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex min-h-[40px] flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2 text-sm md:flex-none font-medium text-ink hover:border-teal hover:text-teal">
+        <button className="flex min-h-[40px] whitespace-nowrap flex-1 items-center justify-center gap-1 glass-btn px-3 py-2 text-sm font-medium md:flex-none">
           <FolderPlus size={16} /> New Category
         </button>
       </DialogTrigger>
@@ -43,7 +43,7 @@ export function AddCategoryDialog({ workspaceId }: { workspaceId: string }) {
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
               maxLength={2}
-              className="w-14 rounded-lg border border-border bg-paper px-2 py-2 text-center text-lg"
+              className="w-14 glass-input px-2 py-2 text-center text-lg"
               aria-label="Emoji icon"
             />
             <input
@@ -51,7 +51,7 @@ export function AddCategoryDialog({ workspaceId }: { workspaceId: string }) {
               placeholder="Category name (e.g. Restaurants)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 rounded-lg border border-border bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
+              className="flex-1 glass-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal"
             />
           </div>
           <div className="flex gap-2">
@@ -68,7 +68,7 @@ export function AddCategoryDialog({ workspaceId }: { workspaceId: string }) {
           <button
             onClick={handleSave}
             disabled={saving || !name.trim()}
-            className="w-full rounded-lg bg-teal px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
+            className="w-full glass-btn-primary px-3 py-2 text-sm font-medium text-teal-foreground disabled:opacity-50"
           >
             Create category
           </button>
