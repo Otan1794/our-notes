@@ -26,7 +26,11 @@ function timeAgo(iso: string) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-export function ItemCard({ item }: { item: Item }) {
+/**
+ * `bare` = rendered inside an accordion row: no card surface of its own, and
+ * no title (the row header already shows it).
+ */
+export function ItemCard({ item, bare = false }: { item: Item; bare?: boolean }) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -40,9 +44,24 @@ export function ItemCard({ item }: { item: Item }) {
   const bodyText = item.type === 'note' ? item.content : item.description;
   const checklist = item.type === 'todo' ? (item.metadata as TodoMetadata)?.checklist ?? [] : [];
 
+  // Local copy so a tick shows instantly instead of waiting for the server
+  // round trip. Re-synced from the server whenever the item is updated.
+  const [lines, setLines] = useState(checklist);
+  const [syncedAt, setSyncedAt] = useState(item.updatedAt);
+  if (syncedAt !== item.updatedAt) {
+    setSyncedAt(item.updatedAt);
+    setLines(checklist);
+  }
+
   async function handleToggleChecklistItem(checklistItemId: string) {
-    await toggleTodoItem(item.id, checklistItemId);
-    router.refresh();
+    setLines((prev) => prev.map((l) => (l.id === checklistItemId ? { ...l, done: !l.done } : l)));
+    try {
+      await toggleTodoItem(item.id, checklistItemId);
+      router.refresh();
+    } catch (err) {
+      console.error('Could not update checklist item:', err);
+      setLines(checklist); // revert to what the server last told us
+    }
   }
 
   async function handleToggleFavorite() {
@@ -62,7 +81,7 @@ export function ItemCard({ item }: { item: Item }) {
   }
 
   return (
-    <div className="group min-w-0 glass-inner rounded-2xl p-4 transition hover:-translate-y-0.5">
+    <div className={bare ? 'group min-w-0' : 'group min-w-0 glass-inner rounded-2xl p-4 transition hover:-translate-y-0.5'}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 text-muted">
           <Icon size={16} />
@@ -160,24 +179,28 @@ export function ItemCard({ item }: { item: Item }) {
         </div>
       )}
 
-      <h3 className="mt-3 break-words font-display text-base font-semibold text-ink">{item.title}</h3>
+      {!bare && <h3 className="mt-3 break-words font-display text-base font-semibold text-ink">{item.title}</h3>}
       {bodyText && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted">{bodyText}</p>}
 
       {item.type === 'todo' && (item.metadata as TodoMetadata)?.dueDate && (
         <DueDateBadge dueDate={(item.metadata as TodoMetadata).dueDate!} />
       )}
 
-      {item.type === 'todo' && checklist.length > 0 && (
-        <ul className="mt-2 space-y-1">
-          {checklist.map((line) => (
-            <li key={line.id} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={line.done}
-                onChange={() => handleToggleChecklistItem(line.id)}
-                className="h-4 w-4 accent-teal"
-              />
-              <span className={line.done ? 'text-sm text-muted line-through' : 'text-sm text-ink'}>{line.text}</span>
+      {/* Each row is a <label>, so tapping the text toggles it too, and the
+          row is 44px tall on phones (Apple's minimum comfortable touch target). */}
+      {item.type === 'todo' && lines.length > 0 && (
+        <ul className="mt-2">
+          {lines.map((line) => (
+            <li key={line.id}>
+              <label className="-mx-2 flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-2 md:min-h-[32px] md:gap-2">
+                <input
+                  type="checkbox"
+                  checked={line.done}
+                  onChange={() => handleToggleChecklistItem(line.id)}
+                  className="h-5 w-5 shrink-0 accent-teal md:h-4 md:w-4"
+                />
+                <span className={line.done ? 'text-sm text-muted line-through' : 'text-sm text-ink'}>{line.text}</span>
+              </label>
             </li>
           ))}
         </ul>

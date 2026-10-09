@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -24,22 +24,31 @@ export function DashboardGrid({
   items: Item[];
   initialLayout: GridLayoutItem[];
 }) {
-  // Phones/small tablets get a simple stacked list (touch-friendly, no
-  // drag-and-drop). md and up (>= 768px) gets the draggable grid.
+  // Phones/small tablets get a simple stacked list with up/down buttons.
+  // md and up (>= 768px) gets the draggable grid.
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [gridRef, width] = useContainerWidth<HTMLDivElement>();
 
+  // Local copy of the saved layout so reordering responds instantly; it
+  // re-syncs whenever the server sends a fresh one.
+  const [savedLayout, setSavedLayout] = useState<GridLayoutItem[]>(initialLayout);
+  useEffect(() => setSavedLayout(initialLayout), [initialLayout]);
+
   const layout: Layout[] = useMemo(() => {
-    if (initialLayout.length) return initialLayout;
-    // sensible default: 2 columns, stacked in creation order
-    return categories.map((c, i) => ({
-      i: c.id,
-      x: (i % 2) * 6,
-      y: Math.floor(i / 2) * 6,
-      w: 6,
-      h: 6
-    }));
-  }, [initialLayout, categories]);
+    const known = new Map(savedLayout.map((l) => [l.i, l]));
+    const bottom = savedLayout.reduce((max, l) => Math.max(max, l.y + l.h), 0);
+    let extra = 0; // categories created after the layout was last saved
+    return categories.map((c, i) => {
+      const existing = known.get(c.id);
+      if (existing) return existing;
+      if (!savedLayout.length) {
+        // sensible default: 2 columns, stacked in creation order
+        return { i: c.id, x: (i % 2) * 6, y: Math.floor(i / 2) * 8, w: 6, h: 8 };
+      }
+      const n = extra++;
+      return { i: c.id, x: (n % 2) * 6, y: bottom + Math.floor(n / 2) * 8, w: 6, h: 8 };
+    });
+  }, [savedLayout, categories]);
 
   const itemsByCategory = useMemo(() => {
     const map = new Map<string, Item[]>();
@@ -68,9 +77,32 @@ export function DashboardGrid({
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
       const simplified: GridLayoutItem[] = newLayout.map((l) => ({ i: l.i, x: l.x, y: l.y, w: l.w, h: l.h }));
-      saveLayout(workspaceId, simplified);
+      setSavedLayout(simplified);
+      saveLayout(workspaceId, simplified).catch((err) => console.error('Could not save layout:', err));
     },
     [workspaceId]
+  );
+
+  // Phone reordering: swap this category's grid position with its neighbour's.
+  // The stacked order is "top to bottom, then left to right", so swapping x/y
+  // swaps their order in both the phone list and the desktop grid.
+  const moveCategory = useCallback(
+    (categoryId: string, direction: -1 | 1) => {
+      const index = orderedCategories.findIndex((c) => c.id === categoryId);
+      const neighbour = orderedCategories[index + direction];
+      if (index < 0 || !neighbour) return;
+      const a = layout.find((l) => l.i === categoryId)!;
+      const b = layout.find((l) => l.i === neighbour.id)!;
+      const next: GridLayoutItem[] = layout.map((l) => {
+        const base = { i: l.i, x: l.x, y: l.y, w: l.w, h: l.h };
+        if (l.i === a.i) return { ...base, x: b.x, y: b.y };
+        if (l.i === b.i) return { ...base, x: a.x, y: a.y };
+        return base;
+      });
+      setSavedLayout(next);
+      saveLayout(workspaceId, next).catch((err) => console.error('Could not save layout:', err));
+    },
+    [layout, orderedCategories, workspaceId]
   );
 
   return (
@@ -111,6 +143,7 @@ export function DashboardGrid({
               onDragStop={handleLayoutChange}
               onResizeStop={handleLayoutChange}
               draggableHandle=".category-drag-handle"
+              draggableCancel=".no-drag"
             >
               {categories.map((category) => (
                 <div key={category.id}>
@@ -120,12 +153,14 @@ export function DashboardGrid({
             </GridLayout>
           ) : (
             <div className="space-y-3">
-              {orderedCategories.map((category) => (
+              {orderedCategories.map((category, index) => (
                 <CategoryCard
                   key={category.id}
                   category={category}
                   items={itemsByCategory.get(category.id) ?? []}
                   stacked
+                  onMoveUp={index > 0 ? () => moveCategory(category.id, -1) : undefined}
+                  onMoveDown={index < orderedCategories.length - 1 ? () => moveCategory(category.id, 1) : undefined}
                 />
               ))}
             </div>
