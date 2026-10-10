@@ -96,17 +96,14 @@ export function ItemCard({ item, bare = false }: { item: Item; bare?: boolean })
             <Star size={16} className={item.isFavorite ? 'fill-coral text-coral' : 'text-muted'} />
           </button>
 
-          <DropdownMenu>
+          {/* modal={false}: otherwise opening the edit dialog while the menu closes leaves the
+              page stuck unclickable (Radix pointer-events bug). */}
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger aria-label="More options" className="-m-1 p-2">
               <MoreVertical size={16} className="text-muted" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault(); // avoid Radix racing the dropdown's close against the dialog's open
-                  setEditOpen(true);
-                }}
-              >
+              <DropdownMenuItem onSelect={() => setEditOpen(true)}>
                 <span className="flex items-center gap-2">
                   <Pencil size={14} /> Edit
                 </span>

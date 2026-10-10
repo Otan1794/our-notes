@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { Category, CreateCategoryInput } from '@/types/category';
+import type { Category, CreateCategoryInput, UpdateCategoryInput } from '@/types/category';
 import { revalidatePath } from 'next/cache';
 
 export async function getCategories(workspaceId: string): Promise<Category[]> {
@@ -40,6 +40,27 @@ export async function createCategory(input: CreateCategoryInput) {
 export async function renameCategory(categoryId: string, name: string) {
   const supabase = await createClient();
   const { error } = await supabase.from('categories').update({ name }).eq('id', categoryId);
+  if (error) throw error;
+  revalidatePath('/dashboard');
+}
+
+export async function updateCategory(categoryId: string, input: UpdateCategoryInput) {
+  const changes: { name?: string; icon?: string; color?: string } = {};
+
+  if (input.name !== undefined) {
+    const name = input.name.trim();
+    if (!name) throw new Error('Category name is required');
+    changes.name = name.slice(0, 60);
+  }
+  if (input.icon !== undefined) changes.icon = input.icon.trim().slice(0, 16) || '📌';
+  if (input.color !== undefined) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(input.color)) throw new Error('Invalid colour');
+    changes.color = input.color;
+  }
+  if (Object.keys(changes).length === 0) return;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('categories').update(changes).eq('id', categoryId);
   if (error) throw error;
   revalidatePath('/dashboard');
 }

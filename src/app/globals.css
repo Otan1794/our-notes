@@ -81,6 +81,19 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Taps register immediately (no double-tap-to-zoom delay) on touch devices. */
+@layer base {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  label,
+  summary {
+    touch-action: manipulation;
+  }
+}
+
 /* ---------------------------------------------------------------------
    Liquid glass
    Inspired by dashersw/liquid-glass-js (frosted blur, bright rim light,
@@ -111,6 +124,25 @@ html {
       inset 0 -1px 0 rgba(255, 255, 255, 0.25),
       0 1px 2px rgba(31, 41, 55, 0.06),
       0 14px 36px -10px rgba(31, 41, 55, 0.2);
+  }
+
+  /* Colour-tinted glass for category cards. Add next to .glass and set
+     --cat-rgb (e.g. "226 114 91") on the element. */
+  .glass-tint {
+    background:
+      linear-gradient(
+        135deg,
+        rgb(var(--cat-rgb) / 0.3) 0%,
+        rgb(var(--cat-rgb) / 0.07) 50%,
+        rgb(var(--cat-rgb) / 0.2) 100%
+      ),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.16) 46%, rgba(255, 255, 255, 0.36) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 1px 0 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px rgba(31, 41, 55, 0.06),
+      0 14px 36px -10px rgb(var(--cat-rgb) / 0.4);
   }
 
   .glass-strong {
@@ -167,9 +199,11 @@ html {
       0 6px 14px -6px rgba(31, 41, 55, 0.2);
     transition: transform 0.15s, background 0.2s, box-shadow 0.2s, color 0.2s;
   }
-  .glass-btn:hover {
-    color: hsl(var(--teal));
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
+  @media (hover: hover) {
+    .glass-btn:hover {
+      color: hsl(var(--teal));
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
+    }
   }
   .glass-btn:active {
     transform: scale(0.97);
@@ -186,8 +220,10 @@ html {
       0 8px 18px -6px hsl(var(--teal) / 0.55);
     transition: transform 0.15s, filter 0.2s;
   }
-  .glass-btn-primary:hover {
-    filter: brightness(1.12);
+  @media (hover: hover) {
+    .glass-btn-primary:hover {
+      filter: brightness(1.12);
+    }
   }
   .glass-btn-primary:active {
     transform: scale(0.97);

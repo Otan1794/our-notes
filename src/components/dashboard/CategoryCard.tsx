@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronUp, GripVertical, MoreVertical, Search, Trash2, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, GripVertical, MoreVertical, Pencil, Search, Trash2, X } from 'lucide-react';
 import type { Category } from '@/types/category';
 import type { Item, TodoMetadata } from '@/types/item';
 import { ItemAccordion } from '@/components/items/ItemAccordion';
 import { deleteCategory } from '@/services/categories';
+import { categoryRgb } from '@/lib/category-colors';
+import { EditCategoryDialog } from '@/components/categories/EditCategoryDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 /** Every word typed must appear somewhere in the item (title, notes, link, tags, checklist). */
@@ -24,8 +26,9 @@ function matchesQuery(item: Item, query: string) {
 }
 
 /**
- * Category options menu. Deleting a category never deletes its items: the
- * database sets their category to null, so they reappear under "Uncategorized".
+ * Category options menu: edit (name, emoji, colour) and delete. Deleting a
+ * category never deletes its items: the database sets their category to
+ * null, so they reappear under "Uncategorized".
  */
 function CategoryMenu({
   category,
@@ -37,6 +40,7 @@ function CategoryMenu({
   className: string;
 }) {
   const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
 
   async function handleDelete() {
     const message =
@@ -54,18 +58,28 @@ function CategoryMenu({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger aria-label={`Options for ${category.name}`} className={className}>
-        <MoreVertical size={16} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem destructive onSelect={handleDelete}>
-          <span className="flex items-center gap-2">
-            <Trash2 size={14} /> Delete category
-          </span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      {/* modal={false}: the menu must not lock the page itself, otherwise opening the
+          edit dialog while it closes leaves the page stuck unclickable (Radix pointer-events bug). */}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger aria-label={`Options for ${category.name}`} className={className}>
+          <MoreVertical size={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+            <span className="flex items-center gap-2">
+              <Pencil size={14} /> Edit category
+            </span>
+          </DropdownMenuItem>
+          <DropdownMenuItem destructive onSelect={handleDelete}>
+            <span className="flex items-center gap-2">
+              <Trash2 size={14} /> Delete category
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <EditCategoryDialog category={category} open={editOpen} onOpenChange={setEditOpen} />
+    </>
   );
 }
 
@@ -88,6 +102,7 @@ export function CategoryCard({
   onMoveDown?: () => void; // undefined = already last
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const rgb = categoryRgb(category.color);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(
@@ -98,7 +113,10 @@ export function CategoryCard({
 
   const title = (
     <>
-      <span className="text-lg" style={{ color: category.color }}>
+      <span
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-base"
+        style={{ backgroundColor: `rgb(${rgb} / 0.22)` }}
+      >
         {category.icon}
       </span>
       <h2 className="min-w-0 truncate font-display text-sm font-semibold text-ink">{category.name}</h2>
@@ -110,7 +128,8 @@ export function CategoryCard({
 
   return (
     <div
-      className={`flex flex-col glass rounded-[22px] p-3 ${stacked ? '' : 'h-full'}`}
+      className={`flex flex-col glass glass-tint rounded-[22px] p-3 ${stacked ? '' : 'h-full'}`}
+      style={{ '--cat-rgb': rgb } as React.CSSProperties}
     >
       {stacked ? (
         <div className="flex items-center gap-1 pb-2">

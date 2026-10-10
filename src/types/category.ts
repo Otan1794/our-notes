@@ -19,3 +19,9 @@ export interface CreateCategoryInput {
   icon?: string;
   color?: string;
 }
+
+export interface UpdateCategoryInput {
+  name?: string;
+  icon?: string;
+  color?: string;
+}
