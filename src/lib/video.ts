@@ -12,11 +12,17 @@ export interface ParsedVideo {
 /**
  * Adding another provider later: add its pattern(s) and an embed URL
  * builder below, following this same shape. Nothing in AddItemDialog,
- * EditItemDialog, or ItemCard needs to change — they only read the
+ * EditItemDialog, or ItemCard needs to change, they only read the
  * returned provider/videoId/embedUrl/thumbnailUrl/aspect.
+ *
+ * This function is pure and synchronous, so it only understands links that
+ * already contain the video ID. Share links copied from the Facebook or
+ * Instagram apps (facebook.com/share/r/..., fb.watch/..., instagram.com/share/reel/...)
+ * hide the ID behind a redirect; those are handled by resolveVideoUrl in
+ * src/services/video.ts, which follows the redirect and then calls this.
  */
 export function parseVideoUrl(url: string): ParsedVideo | null {
-  // YouTube Shorts — vertical. Checked before the general YouTube patterns
+  // YouTube Shorts, vertical. Checked before the general YouTube patterns
   // below since a Shorts URL would otherwise still match the /watch? style
   // pattern's video-ID group in some redirect forms.
   let match = url.match(/youtube\.com\/shorts\/([\w-]{11})/);
@@ -31,7 +37,7 @@ export function parseVideoUrl(url: string): ParsedVideo | null {
     };
   }
 
-  // Standard YouTube (watch/youtu.be/embed links) — horizontal.
+  // Standard YouTube (watch/youtu.be/embed links), horizontal.
   const youtubeHorizontalPatterns = [
     /youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})/,
     /youtu\.be\/([\w-]{11})/,
@@ -51,12 +57,13 @@ export function parseVideoUrl(url: string): ParsedVideo | null {
     }
   }
 
-  // Instagram Reels — vertical. No public thumbnail endpoint like YouTube's
-  // exists, so thumbnailUrl is left unset; ItemCard shows a placeholder
-  // until the embed is played. Note: Instagram's embed can still show a
-  // "log in to see more" prompt for some public posts — this is Meta's
-  // embed behavior, not something fixable on this end.
-  match = url.match(/instagram\.com\/reels?\/([\w-]+)/);
+  // Instagram Reels, vertical. The optional (?:[\w.]+\/)? lets it match
+  // links that have a username in the path, e.g. instagram.com/someone/reel/ID.
+  // No public thumbnail endpoint like YouTube's exists, so thumbnailUrl is
+  // left unset; ItemCard shows a placeholder until the embed is played.
+  // Note: Instagram's embed can still show a "log in to see more" prompt for
+  // some public posts. This is Meta's embed behavior, not fixable on this end.
+  match = url.match(/instagram\.com\/(?:[\w.]+\/)?reels?\/([\w-]+)/);
   if (match) {
     const videoId = match[1];
     return {
@@ -67,15 +74,19 @@ export function parseVideoUrl(url: string): ParsedVideo | null {
     };
   }
 
-  // Facebook Reels — vertical, via Facebook's public video plugin iframe.
+  // Facebook Reels, vertical, via Facebook's public video plugin iframe.
+  // The embed is built from the clean /reel/ID URL rather than whatever was
+  // pasted, so tracking parameters (?mibextid=...) can't break it.
   // Same caveat as Instagram: reliable for public posts, not guaranteed
   // for anything with restricted visibility.
   match = url.match(/facebook\.com\/reel\/(\d+)/);
   if (match) {
+    const videoId = match[1];
+    const canonical = `https://www.facebook.com/reel/${videoId}`;
     return {
       provider: 'facebook',
-      videoId: match[1],
-      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`,
+      videoId,
+      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(canonical)}&show_text=false`,
       aspect: 'vertical'
     };
   }

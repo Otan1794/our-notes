@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { updateItem } from '@/services/items';
 import { getCategories } from '@/services/categories';
 import { ChecklistEditor } from './ChecklistEditor';
-import { parseVideoUrl } from '@/lib/video';
+import { resolveVideoUrl } from '@/services/video';
 import type { ChecklistItem, Item, TodoMetadata } from '@/types/item';
 
 export function EditItemDialog({
@@ -57,7 +57,11 @@ export function EditItemDialog({
       content: item.type === 'note' ? body : undefined,
       url: isLinkLike ? body : undefined,
       description: item.type !== 'note' && !isTodo && item.type !== 'video' && item.type !== 'location' ? body : undefined,
-      metadata: isTodo ? { checklist, dueDate: dueDate || undefined } : item.type === 'video' ? parseVideoUrl(body) ?? {} : undefined
+      metadata: isTodo
+        ? { checklist, dueDate: dueDate || undefined }
+        : item.type === 'video'
+          ? (await resolveVideoUrl(body.trim())) ?? {}
+          : undefined
     });
     router.refresh();
     setSaving(false);
@@ -91,7 +95,7 @@ export function EditItemDialog({
             </div>
           ) : item.type === 'location' ? (
             <p className="text-xs text-muted">
-              To change the place itself, delete this item and add it again — only the title and category can be edited here.
+              To change the place itself, delete this item and add it again, only the title and category can be edited here.
             </p>
           ) : (
             <textarea

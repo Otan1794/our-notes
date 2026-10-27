@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ITEM_TYPE_REGISTRY } from './registry';
 import { ChecklistEditor } from './ChecklistEditor';
-import { parseVideoUrl } from '@/lib/video';
+import { resolveVideoUrl } from '@/services/video';
 import { resolveMapsLink, type ParsedMapsLocation } from '@/services/maps';
 import { buildEmbedUrl } from '@/lib/maps-embed';
 import type { ChecklistItem, ItemType } from '@/types/item';
@@ -15,7 +15,19 @@ import { createItem } from '@/services/items';
 const URL_PATTERN = /^https?:\/\//i;
 const MAPS_LINK_PATTERN = /(?:maps\.app\.goo\.gl|goo\.gl\/maps|google\.[a-z.]+\/maps)/i;
 
-export function AddItemDialog({ workspaceId, categories }: { workspaceId: string; categories: { id: string; name: string }[] }) {
+/**
+ * Lives inside a category card. Everything it saves goes straight into that
+ * category, so there is no category picker in the form.
+ */
+export function AddItemDialog({
+  workspaceId,
+  categoryId,
+  categoryName
+}: {
+  workspaceId: string;
+  categoryId: string;
+  categoryName: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [quickText, setQuickText] = useState('');
@@ -24,10 +36,9 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
   const [body, setBody] = useState('');
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [dueDate, setDueDate] = useState('');
-  const [categoryId, setCategoryId] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
-  // Location (keyless — paste a Google Maps link and resolve it)
+  // Location (keyless, paste a Google Maps link and resolve it)
   const [mapsLinkInput, setMapsLinkInput] = useState('');
   const [resolvedLocation, setResolvedLocation] = useState<ParsedMapsLocation | null>(null);
   const [resolvingLink, setResolvingLink] = useState(false);
@@ -67,7 +78,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
     const isUrl = URL_PATTERN.test(trimmed);
 
     // A Google Maps link (short or full) gets resolved and saved as a
-    // Location, same as manually picking that type — checked before the
+    // Location, same as manually picking that type, checked before the
     // video check since a maps.google.com URL would never match a video
     // pattern anyway, but ordering here keeps the intent explicit.
     if (isUrl && MAPS_LINK_PATTERN.test(trimmed)) {
@@ -75,7 +86,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
       if (resolved) {
         await createItem({
           workspaceId,
-          categoryId: categoryId || null,
+          categoryId,
           type: 'location',
           title: resolved.name,
           url: resolved.mapsUrl,
@@ -86,21 +97,23 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
         return;
       }
       // Resolution failed (e.g. link format Google changed, or a network
-      // hiccup) — fall through and save it as a plain link rather than
+      // hiccup), fall through and save it as a plain link rather than
       // losing what was pasted.
     }
 
-    const videoInfo = parseVideoUrl(trimmed);
+    // resolveVideoUrl also follows Facebook/Instagram share links to the
+    // real reel URL, which the synchronous parseVideoUrl can't do.
+    const videoInfo = isUrl ? await resolveVideoUrl(trimmed) : null;
     await createItem({
       workspaceId,
-      categoryId: categoryId || null,
+      categoryId,
       type: videoInfo ? 'video' : isUrl ? 'link' : 'note',
       title: isUrl ? trimmed : trimmed.slice(0, 80),
       content: isUrl ? undefined : trimmed,
       url: isUrl ? trimmed : undefined,
       metadata: videoInfo ?? undefined
     });
-    // revalidatePath (in createItem) only invalidates the cache — it doesn't
+    // revalidatePath (in createItem) only invalidates the cache, it doesn't
     // push new data to a page already mounted in the browser. router.refresh()
     // re-runs the current route's server components against the fresh data.
     router.refresh();
@@ -113,7 +126,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
     setSaving(true);
     await createItem({
       workspaceId,
-      categoryId: categoryId || null,
+      categoryId,
       type: selectedType,
       title: title.trim(),
       content: selectedType === 'note' ? body : undefined,
@@ -131,7 +144,7 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
         selectedType === 'todo'
           ? { checklist, dueDate: dueDate || undefined }
           : selectedType === 'video'
-            ? parseVideoUrl(body) ?? {}
+            ? (await resolveVideoUrl(body.trim())) ?? {}
             : selectedType === 'location' && resolvedLocation
               ? { lat: resolvedLocation.lat, lng: resolvedLocation.lng, mapsUrl: resolvedLocation.mapsUrl }
               : undefined
@@ -149,7 +162,6 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
     setBody('');
     setChecklist([]);
     setDueDate('');
-    setCategoryId('');
     setMapsLinkInput('');
     setResolvedLocation(null);
     setResolveError(false);
@@ -158,12 +170,15 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex min-h-[40px] whitespace-nowrap flex-1 items-center justify-center gap-1 glass-btn-primary px-4 py-2 text-sm md:flex-none font-medium text-teal-foreground hover:opacity-90">
-          <Plus size={16} /> Add Item
+        <button
+          aria-label={`Add item to ${categoryName}`}
+          className="flex h-10 shrink-0 items-center justify-center gap-1 glass-btn-primary px-3 text-sm font-medium"
+        >
+          <Plus size={16} /> Add
         </button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle className="font-display text-lg font-semibold">Add something</DialogTitle>
+        <DialogTitle className="pr-6 font-display text-lg font-semibold">Add to {categoryName}</DialogTitle>
 
         {!selectedType ? (
           <div className="mt-4 space-y-4">
@@ -278,18 +293,6 @@ export function AddItemDialog({ workspaceId, categories }: { workspaceId: string
               />
             )}
 
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full glass-input px-3 py-2 text-sm"
-            >
-              <option value="">No category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
             <div className="flex gap-2">
               <button onClick={() => setSelectedType(null)} className="glass-btn flex-1 px-3 py-2 text-sm">
                 Back

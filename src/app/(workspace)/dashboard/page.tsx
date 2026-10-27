@@ -4,7 +4,6 @@ import { getCategories } from '@/services/categories';
 import { getItems } from '@/services/items';
 import { getLayout } from '@/services/layouts';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
-import { AddItemDialog } from '@/components/items/AddItemDialog';
 import { AddCategoryDialog } from '@/components/categories/AddCategoryDialog';
 import { SearchBar } from '@/components/search/SearchBar';
 import { SignOutButton } from '@/components/auth/SignOutButton';
@@ -52,7 +51,6 @@ export default async function DashboardPage() {
         <div className="flex flex-1 flex-wrap items-center gap-2 md:justify-end md:gap-3">
           <SearchBar workspaceId={workspaceId} />
           {categories.length > 0 && <AddCategoryDialog workspaceId={workspaceId} />}
-          <AddItemDialog workspaceId={workspaceId} categories={categories} />
           <SignOutButton />
         </div>
       </header>

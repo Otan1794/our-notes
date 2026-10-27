@@ -107,9 +107,9 @@ export function DashboardGrid({
 
   return (
     <div>
-      {/* Items with no category always show here — they're never lost,
-          even before any category exists. This section isn't draggable;
-          only category cards go in the grid below. */}
+      {/* Items with no category (for example, left over after their category
+          was deleted) always show here, so they're never lost. This section
+          isn't draggable; only category cards go in the grid below. */}
       {uncategorizedItems.length > 0 && (
         <div className="mb-6">
           <h2 className="mb-2 font-display text-sm font-semibold text-muted">Uncategorized</h2>
@@ -123,9 +123,8 @@ export function DashboardGrid({
 
       {categories.length === 0 ? (
         <div className="flex flex-col items-center justify-center glass-inner rounded-[22px] py-16 text-center">
-          <p className="text-sm text-muted">
-            No categories yet. Create one to start organizing your dashboard —
-            or just keep adding items and sort them later.
+          <p className="max-w-sm px-4 text-sm text-muted">
+            No categories yet. Create one, then add items to it from its card.
           </p>
           <div className="mt-4">
             <AddCategoryDialog workspaceId={workspaceId} />

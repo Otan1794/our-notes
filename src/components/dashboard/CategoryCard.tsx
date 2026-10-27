@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, GripVertical, MoreVertical, Pencil, Search, Tra
 import type { Category } from '@/types/category';
 import type { Item, TodoMetadata } from '@/types/item';
 import { ItemAccordion } from '@/components/items/ItemAccordion';
+import { AddItemDialog } from '@/components/items/AddItemDialog';
 import { deleteCategory } from '@/services/categories';
 import { categoryRgb } from '@/lib/category-colors';
 import { EditCategoryDialog } from '@/components/categories/EditCategoryDialog';
@@ -179,32 +180,37 @@ export function CategoryCard({
 
       {!(stacked && collapsed) && (
         <>
-          {items.length > 0 && (
-            <div className="relative mb-2">
-              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input
-                type="text"
-                inputMode="search"
-                enterKeyHint="search"
-                autoComplete="off"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
-                placeholder="Filter items…"
-                aria-label={`Filter items in ${category.name}`}
-                className="glass-input w-full py-2 pl-9 pr-9 text-sm outline-none focus:ring-2 focus:ring-teal"
-              />
-              {query && (
-                <button
-                  onClick={() => setQuery('')}
-                  aria-label="Clear filter"
-                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-muted"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-          )}
+          {/* Filter box (only once there are items to filter) next to the Add button.
+              Items added here always land in this category. */}
+          <div className="mb-2 flex items-center justify-end gap-2">
+            {items.length > 0 && (
+              <div className="relative min-w-0 flex-1">
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="text"
+                  inputMode="search"
+                  enterKeyHint="search"
+                  autoComplete="off"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
+                  placeholder="Filter items…"
+                  aria-label={`Filter items in ${category.name}`}
+                  className="glass-input w-full py-2 pl-9 pr-9 text-sm outline-none focus:ring-2 focus:ring-teal"
+                />
+                {query && (
+                  <button
+                    onClick={() => setQuery('')}
+                    aria-label="Clear filter"
+                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-muted"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            )}
+            <AddItemDialog workspaceId={category.workspaceId} categoryId={category.id} categoryName={category.name} />
+          </div>
 
           {/* -mx-1/px-1 leaves room for the open row's shadow, which the scroll container would otherwise clip */}
           <div className={stacked ? '' : '-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-1'}>
